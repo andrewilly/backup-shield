@@ -8,7 +8,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  MANIFEST_PATH: Backup-shield/Cargo.toml
 
 jobs:
   build-and-test:
@@ -18,10 +17,6 @@ jobs:
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
-
-    defaults:
-      run:
-        working-directory: Backup-shield
 
     steps:
       - uses: actions/checkout@v4
@@ -34,17 +29,16 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: Backup-shield
           cache-on-failure: true
 
       - name: cargo check
-        run: cargo check --manifest-path ${{ env.MANIFEST_PATH }} --all-targets
+        run: cargo check --all-targets
 
       - name: cargo test
-        run: cargo test --manifest-path ${{ env.MANIFEST_PATH }}
+        run: cargo test
 
       - name: cargo clippy
-        run: cargo clippy --manifest-path ${{ env.MANIFEST_PATH }} --all-targets -- -D warnings
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: cargo fmt --check
-        run: cargo fmt --manifest-path ${{ env.MANIFEST_PATH }} --check
+        run: cargo fmt --check
