@@ -14,7 +14,8 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        # macos-13 = Intel x86_64 runner; macos-latest = ARM64
+        os: [macos-13, ubuntu-latest, windows-latest]
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
