@@ -14,7 +14,7 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        # macos-13 = Intel x86_64 runner; macos-latest = ARM64
+        # macos-13 = Intel x86_64 (native + cross-compile ARM64 for universal)
         os: [macos-13, ubuntu-latest, windows-latest]
       fail-fast: false
 
@@ -28,6 +28,10 @@ jobs:
         with:
           components: clippy, rustfmt
 
+      - name: Add ARM64 target (macOS only)
+        if: runner.os == 'macOS'
+        run: rustup target add aarch64-apple-darwin
+
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
@@ -36,14 +40,28 @@ jobs:
       - name: cargo check
         run: cargo check --all-targets
 
-      - name: Build CLI binary
+      - name: Build CLI binary (native)
         run: cargo build --release -p backup-shield-cli
+
+      - name: Build ARM64 binary (macOS universal)
+        if: runner.os == 'macOS'
+        run: cargo build --release --target aarch64-apple-darwin -p backup-shield-cli
+
+      - name: Create universal binary (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          lipo -create \
+            target/release/backup-shield \
+            target/aarch64-apple-darwin/release/backup-shield \
+            -output target/release/backup-shield-universal
+          # Replace native binary with universal
+          cp target/release/backup-shield-universal target/release/backup-shield
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: backup-shield-${{ runner.os }}
-          path: target/release/backup-shield${{ runner.os == 'Windows' && '.exe' || '' }}
+          name: backup-shield-${{ runner.os }}${{ runner.os == 'macOS' && '-universal' || '' }}
+          path: target/release/backup-shield${{ runner.os == 'Windows' && '.exe' || runner.os == 'macOS' && '' || '' }}
           if-no-files-found: error
 
       - name: Set binary path (Unix)
