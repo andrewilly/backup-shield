@@ -89,7 +89,7 @@ fn test_daily_weekly_monthly_retention() {
         remaining.len()
     );
     assert!(
-        remaining.len() >= 1,
+        !remaining.is_empty(),
         "expected at least 1 snapshot to remain (min_snapshots not set), got {}",
         remaining.len()
     );

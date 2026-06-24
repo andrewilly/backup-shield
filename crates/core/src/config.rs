@@ -162,10 +162,15 @@ mod tests {
 
     #[test]
     fn invalid_compression_level_fails() {
-        let mut config = RepositoryConfig::default();
-        config.compression_level = 0;
+        let config = RepositoryConfig {
+            compression_level: 0,
+            ..RepositoryConfig::default()
+        };
         assert!(config.validate().is_err());
-        config.compression_level = 23;
+        let config = RepositoryConfig {
+            compression_level: 23,
+            ..RepositoryConfig::default()
+        };
         assert!(config.validate().is_err());
     }
 
