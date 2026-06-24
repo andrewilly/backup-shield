@@ -691,35 +691,41 @@ mod tests {
     fn write_and_read_single_chunk() {
         let (_dir, repo_path) = temp_repo();
 
-        // Write.
+        // Use the actual SHA-256 hash of "hello pack".
+        let data = b"hello pack";
+        let actual_hash = hex::encode(compute_checksum(data));
+
         let mut writer = PackWriter::new(&repo_path, 1, DEFAULT_PACK_SIZE);
-        writer.add_chunk(&"a".repeat(64), b"hello pack");
+        writer.add_chunk(&actual_hash, data);
         let flush_result = writer.flush().unwrap().unwrap();
 
         assert_eq!(flush_result.pack_id, 1);
         assert_eq!(flush_result.chunk_count, 1);
         assert_eq!(flush_result.chunk_locations.len(), 1);
-        assert_eq!(flush_result.chunk_locations[0].0, "a".repeat(64));
+        assert_eq!(flush_result.chunk_locations[0].0, actual_hash);
 
         // Read.
         let reader = PackReader::new(&repo_path);
         let (h, offset, _size) = &flush_result.chunk_locations[0];
-        let data = reader.read_chunk(flush_result.pack_id, *offset, h).unwrap();
-        assert_eq!(data, b"hello pack");
+        let read_data = reader.read_chunk(flush_result.pack_id, *offset, h).unwrap();
+        assert_eq!(read_data, data);
     }
 
     #[test]
     fn write_multiple_chunks_and_read_back() {
         let (_dir, repo_path) = temp_repo();
 
-        let mut writer = PackWriter::new(&repo_path, 1, DEFAULT_PACK_SIZE);
-        let hash_a = "a".repeat(64);
-        let hash_b = "b".repeat(64);
-        let hash_c = "c".repeat(64);
+        let data_a = b"chunk A";
+        let data_b = b"chunk B data that is longer";
+        let data_c = b"C";
+        let hash_a = hex::encode(compute_checksum(data_a));
+        let hash_b = hex::encode(compute_checksum(data_b));
+        let hash_c = hex::encode(compute_checksum(data_c));
 
-        writer.add_chunk(&hash_a, b"chunk A");
-        writer.add_chunk(&hash_b, b"chunk B data that is longer");
-        writer.add_chunk(&hash_c, b"C");
+        let mut writer = PackWriter::new(&repo_path, 1, DEFAULT_PACK_SIZE);
+        writer.add_chunk(&hash_a, data_a);
+        writer.add_chunk(&hash_b, data_b);
+        writer.add_chunk(&hash_c, data_c);
 
         let result = writer.flush().unwrap().unwrap();
         assert_eq!(result.chunk_count, 3);

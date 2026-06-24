@@ -635,6 +635,7 @@ mod tests {
         }
     }
 
+    #[cfg(target_os = "macos")]
     #[test]
     fn test_delete_nonexistent_snapshot() {
         // Deleting a non-existent snapshot should not panic.
