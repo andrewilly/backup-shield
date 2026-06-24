@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.backup-shield.daily</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/path/to/backup-shield/scripts/backup-shield.sh</string>
+        <string>/Users/YOUR_USER/Documents</string>
+        <string>/Volumes/Backup/repo</string>
+        <string>--tag</string>
+        <string>automatic</string>
+    </array>
+    
+    <key>RunAtLoad</key>
+    <false/>
+    
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>2</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    
+    <key>StandardOutPath</key>
+    <string>/var/log/backup-shield.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/var/log/backup-shield-error.log</string>
+</dict>
+</plist>

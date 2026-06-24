@@ -1,0 +1,30 @@
+[package]
+name = "backup-shield-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "backup-shield"
+path = "src/main.rs"
+
+[dependencies]
+backup-shield-core = { workspace = true }
+backup-shield-crypto = { workspace = true }
+backup-shield-compression = { workspace = true }
+backup-shield-ecc = { workspace = true }
+backup-shield-storage = { workspace = true }
+backup-shield-verify = { workspace = true }
+backup-shield-restore = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+chrono = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+walkdir = { workspace = true }
+dirs = { workspace = true }
+libc = "0.2"
+rpassword = "7"

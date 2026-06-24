@@ -1,0 +1,21 @@
+[package]
+name = "backup-shield-verify"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+backup-shield-core = { workspace = true }
+backup-shield-ecc = { workspace = true }
+sha2 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+hex = { workspace = true }
+chrono = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+backup-shield-restore = { path = "../restore" }

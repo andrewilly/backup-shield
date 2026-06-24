@@ -1,0 +1,10 @@
+[package]
+name = "backup-shield-compression"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+zstd = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }

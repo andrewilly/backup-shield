@@ -1,0 +1,20 @@
+[package]
+name = "backup-shield-restore"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+backup-shield-core = { workspace = true }
+backup-shield-compression = { workspace = true }
+backup-shield-crypto = { workspace = true }
+sha2 = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+hex = { workspace = true }
+chrono = { workspace = true }
+glob = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
