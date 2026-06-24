@@ -28,7 +28,10 @@ fn test_init_valid_path() {
 }
 
 #[test]
+#[cfg_attr(target_os = "windows", ignore)]
 fn test_init_invalid_path_fails() {
+    // On Windows, /nonexistent/... is a valid relative path (resolves to
+    // drive root), so the test only applies to Unix platforms.
     backup_shield()
         .arg("init")
         .arg("/nonexistent/parent/for/init/test")
