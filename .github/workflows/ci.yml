@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main, master]
+    tags: ['v*']
   pull_request:
     branches: [main, master]
 
@@ -35,16 +36,23 @@ jobs:
         run: cargo check --all-targets
 
       - name: Build CLI binary
-        run: cargo build -p backup-shield-cli
+        run: cargo build --release -p backup-shield-cli
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-shield-${{ runner.os }}
+          path: target/release/backup-shield${{ runner.os == 'Windows' && '.exe' || '' }}
+          if-no-files-found: error
 
       - name: Set binary path (Unix)
         if: runner.os != 'Windows'
-        run: echo "CARGO_BIN_EXE_backup-shield=$PWD/target/debug/backup-shield" >> $GITHUB_ENV
+        run: echo "CARGO_BIN_EXE_backup-shield=$PWD/target/release/backup-shield" >> $GITHUB_ENV
 
       - name: Set binary path (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: echo "CARGO_BIN_EXE_backup-shield=$env:GITHUB_WORKSPACE\target\debug\backup-shield.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+        run: echo "CARGO_BIN_EXE_backup-shield=$env:GITHUB_WORKSPACE\target\release\backup-shield.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: cargo test
         run: cargo test
