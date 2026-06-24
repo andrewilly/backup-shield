@@ -34,7 +34,12 @@ jobs:
       - name: cargo check
         run: cargo check --all-targets
 
+      - name: Build CLI binary
+        run: cargo build -p backup-shield-cli
+
       - name: cargo test
+        env:
+          CARGO_BIN_EXE_backup-shield: target/debug/backup-shield
         run: cargo test
 
       - name: cargo clippy
