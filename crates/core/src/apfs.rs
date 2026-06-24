@@ -464,6 +464,7 @@ impl ApfsSnapshotGuard {
     /// Explicitly clean up: unmount the snapshot and delete it.
     ///
     /// This is idempotent — calling it multiple times has no effect.
+    #[allow(clippy::needless_return)]
     pub fn cleanup(&self) {
         if self.cleaned_up.swap(true, Ordering::SeqCst) {
             return;
