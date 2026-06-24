@@ -2470,12 +2470,8 @@ fn cmd_compact(repo_str: &str) -> Result<()> {
     println!("  Live chunks: {}", live_hashes.len());
 
     // compact_packs acquires its own exclusive flock.
-    let result = compact_packs(
-        repo_path,
-        &live_hashes,
-        pack_target_size,
-    )
-    .with_context(|| format!("failed to compact repository at {}", repo_str))?;
+    let result = compact_packs(repo_path, &live_hashes, pack_target_size)
+        .with_context(|| format!("failed to compact repository at {}", repo_str))?;
 
     println!();
     println!("Compaction complete in");
@@ -2757,8 +2753,12 @@ fn cmd_restore_version(repo_str: &str, file_path: &str, version: &str, target: &
     let tmp_path = target_file.with_extension("tmp");
     fs::write(&tmp_path, &file_data)
         .with_context(|| format!("failed to write temp file {:?}", tmp_path))?;
-    fs::rename(&tmp_path, &target_file)
-        .with_context(|| format!("failed to rename temp file {:?} to {:?}", tmp_path, target_file))?;
+    fs::rename(&tmp_path, &target_file).with_context(|| {
+        format!(
+            "failed to rename temp file {:?} to {:?}",
+            tmp_path, target_file
+        )
+    })?;
 
     println!(
         "Restored: {} ({} bytes)",
@@ -3144,10 +3144,7 @@ fn cmd_restore_system(
                 return Ok(());
             }
             println!("System manifest loaded:");
-            println!(
-                "  OS: {} (build {})",
-                m.os_version, m.build_number
-            );
+            println!("  OS: {} (build {})", m.os_version, m.build_number);
             println!("  Hardware: {}", m.hardware_model);
             println!("  Hostname: {}", m.hostname);
             println!(
@@ -4022,10 +4019,7 @@ fn build_multi_source_tree(
     previous_snapshot: Option<&Snapshot>,
     exclude: &[String],
 ) -> Result<SnapshotNode> {
-    let virtual_root_name = format!(
-        "MultiSource-{}",
-        chrono::Utc::now().format("%Y%m%d-%H%M%S")
-    );
+    let virtual_root_name = format!("MultiSource-{}", chrono::Utc::now().format("%Y%m%d-%H%M%S"));
 
     let mut children = Vec::new();
 
@@ -4413,10 +4407,7 @@ fn setup_windows_task(
     exclude: &[String],
 ) -> Result<()> {
     // Generate the command-line arguments that will be embedded in the task.
-    let mut args = format!(
-        "backup \"{}\" --repo \"{}\"",
-        source_path, repo_str
-    );
+    let mut args = format!("backup \"{}\" --repo \"{}\"", source_path, repo_str);
     for tag in tags {
         args.push_str(&format!(" -t \"{}\"", tag));
     }
@@ -4455,8 +4446,7 @@ fn setup_windows_task(
     };
 
     // Use the current Windows user instead of LOCAL_SYSTEM for safety.
-    let current_user = std::env::var("USERDOMAIN")
-        .unwrap_or_else(|_| ".".to_string())
+    let current_user = std::env::var("USERDOMAIN").unwrap_or_else(|_| ".".to_string())
         + "\\"
         + &std::env::var("USERNAME").unwrap_or_else(|_| "SYSTEM".to_string());
 
@@ -4525,7 +4515,9 @@ fn setup_windows_task(
             "/f",
         ])
         .output()
-        .with_context(|| "failed to execute schtasks.exe — ensure the process is running as Administrator")?;
+        .with_context(|| {
+            "failed to execute schtasks.exe — ensure the process is running as Administrator"
+        })?;
 
     // Clean up the temp XML file.
     let _ = std::fs::remove_file(&xml_path);
@@ -4534,7 +4526,10 @@ fn setup_windows_task(
         println!("  ✓ Scheduled task '{}' created successfully.", name);
         println!();
         println!("  To run manually:   schtasks /run /tn \"{}\"", name);
-        println!("  To disable:        schtasks /change /tn \"{}\" /disable", name);
+        println!(
+            "  To disable:        schtasks /change /tn \"{}\" /disable",
+            name
+        );
         println!("  To view:           schtasks /query /tn \"{}\"", name);
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -4591,7 +4586,9 @@ fn unschedule_windows_task(schedule: Option<Schedule>) -> Result<()> {
     }
 
     if any_failed {
-        anyhow::bail!("One or more scheduled tasks could not be removed. Try running as Administrator.");
+        anyhow::bail!(
+            "One or more scheduled tasks could not be removed. Try running as Administrator."
+        );
     }
 
     Ok(())

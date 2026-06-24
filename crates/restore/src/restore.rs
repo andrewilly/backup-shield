@@ -560,19 +560,40 @@ impl Restorer {
                             {
                                 use backup_shield_core::windows_attrs;
                                 if let Some(attrs) = &file.windows_attributes {
-                                    if let Err(e) = windows_attrs::apply_file_attributes(&target_file, *attrs) {
-                                        log::warn!("failed to restore Windows attributes for {:?}: {}", target_file, e);
+                                    if let Err(e) =
+                                        windows_attrs::apply_file_attributes(&target_file, *attrs)
+                                    {
+                                        log::warn!(
+                                            "failed to restore Windows attributes for {:?}: {}",
+                                            target_file,
+                                            e
+                                        );
                                     }
                                 }
                                 if let Some(acl) = &file.windows_acl {
-                                    if let Err(e) = windows_attrs::apply_security_descriptor(&target_file, acl) {
-                                        log::warn!("failed to restore ACL for {:?}: {}", target_file, e);
+                                    if let Err(e) =
+                                        windows_attrs::apply_security_descriptor(&target_file, acl)
+                                    {
+                                        log::warn!(
+                                            "failed to restore ACL for {:?}: {}",
+                                            target_file,
+                                            e
+                                        );
                                     }
                                 }
                                 if let Some(ads) = &file.windows_ads {
                                     for (name, content) in ads {
-                                        if let Err(e) = windows_attrs::write_alternate_data_stream(&target_file, name, content) {
-                                            log::warn!("failed to restore ADS '{}' for {:?}: {}", name, target_file, e);
+                                        if let Err(e) = windows_attrs::write_alternate_data_stream(
+                                            &target_file,
+                                            name,
+                                            content,
+                                        ) {
+                                            log::warn!(
+                                                "failed to restore ADS '{}' for {:?}: {}",
+                                                name,
+                                                target_file,
+                                                e
+                                            );
                                         }
                                     }
                                 }

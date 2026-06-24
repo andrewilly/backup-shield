@@ -165,8 +165,9 @@ pub fn decompress_chunk(data: &[u8]) -> Result<Vec<u8>> {
     }
 
     // Use bulk decompress with capacity limit for memory safety.
-    let output = zstd::bulk::decompress(payload, original_size)
-        .map_err(|e| CompressionError::DecompressError(format!("zstd decompression failed: {}", e)))?;
+    let output = zstd::bulk::decompress(payload, original_size).map_err(|e| {
+        CompressionError::DecompressError(format!("zstd decompression failed: {}", e))
+    })?;
     Ok(output)
 }
 

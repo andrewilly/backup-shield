@@ -187,7 +187,11 @@ impl SystemManifest {
             .filter(|l| l.ends_with(".app"))
             .map(|name| AppInfo {
                 name: name.trim_end_matches(".app").to_string(),
-                path: format!("{}/{}", config.applications_path.trim_end_matches('/'), name),
+                path: format!(
+                    "{}/{}",
+                    config.applications_path.trim_end_matches('/'),
+                    name
+                ),
                 version: None,
                 bundle_id: None,
             })

@@ -28,19 +28,17 @@ use std::ptr;
 
 use windows::core::PWSTR;
 use windows::Win32::Foundation::{
-    ERROR_HANDLE_EOF, ERROR_SUCCESS, GetLastError, HLOCAL, LocalFree, WIN32_ERROR,
+    GetLastError, LocalFree, ERROR_HANDLE_EOF, ERROR_SUCCESS, HLOCAL, WIN32_ERROR,
 };
+use windows::Win32::Security::Authorization::{GetNamedSecurityInfoW, SE_FILE_OBJECT};
 use windows::Win32::Security::{
-    GetSecurityDescriptorLength, PSECURITY_DESCRIPTOR, SetFileSecurityW,
-};
-use windows::Win32::Security::Authorization::{
-    GetNamedSecurityInfoW, SE_FILE_OBJECT,
+    GetSecurityDescriptorLength, SetFileSecurityW, PSECURITY_DESCRIPTOR,
 };
 use windows::Win32::Storage::FileSystem::{
-    FILE_ATTRIBUTE_ARCHIVE, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED,
-    FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_SYSTEM, FILE_FLAGS_AND_ATTRIBUTES,
     FindClose, FindFirstStreamW, FindNextStreamW, GetFileAttributesW, SetFileAttributesW,
-    STREAM_INFO_LEVELS, WIN32_FIND_STREAM_DATA,
+    FILE_ATTRIBUTE_ARCHIVE, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED,
+    FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_SYSTEM, FILE_FLAGS_AND_ATTRIBUTES, STREAM_INFO_LEVELS,
+    WIN32_FIND_STREAM_DATA,
 };
 
 // ── File attributes ───────────────────────────────────────────────────────────
@@ -60,11 +58,7 @@ pub fn read_file_attributes(path: &Path) -> Result<Option<u32>> {
 
     if attrs == u32::MAX {
         let err = unsafe { GetLastError() };
-        log::warn!(
-            "GetFileAttributesW failed for {:?}: {:?}",
-            path,
-            err
-        );
+        log::warn!("GetFileAttributesW failed for {:?}: {:?}", path, err);
         return Ok(None);
     }
 
@@ -109,11 +103,7 @@ pub fn apply_file_attributes(path: &Path, attributes: u32) -> Result<()> {
 
     if result.is_err() {
         let err = unsafe { GetLastError() };
-        anyhow::bail!(
-            "SetFileAttributesW failed for {:?}: error {:?}",
-            path,
-            err
-        );
+        anyhow::bail!("SetFileAttributesW failed for {:?}: error {:?}", path, err);
     }
 
     Ok(())
@@ -133,8 +123,10 @@ pub fn read_security_descriptor(path: &Path) -> Result<Option<Vec<u8>>> {
         .collect();
 
     let mut sd: PSECURITY_DESCRIPTOR = PSECURITY_DESCRIPTOR(ptr::null_mut());
-    let mut _owner: windows::Win32::Security::PSID = windows::Win32::Security::PSID(ptr::null_mut());
-    let mut _group: windows::Win32::Security::PSID = windows::Win32::Security::PSID(ptr::null_mut());
+    let mut _owner: windows::Win32::Security::PSID =
+        windows::Win32::Security::PSID(ptr::null_mut());
+    let mut _group: windows::Win32::Security::PSID =
+        windows::Win32::Security::PSID(ptr::null_mut());
 
     let security_info = windows::Win32::Security::DACL_SECURITY_INFORMATION
         | windows::Win32::Security::OWNER_SECURITY_INFORMATION
@@ -169,9 +161,7 @@ pub fn read_security_descriptor(path: &Path) -> Result<Option<Vec<u8>>> {
 
     let sd_len = unsafe { GetSecurityDescriptorLength(sd) };
 
-    let bytes = unsafe {
-        std::slice::from_raw_parts(sd.0 as *const u8, sd_len as usize).to_vec()
-    };
+    let bytes = unsafe { std::slice::from_raw_parts(sd.0 as *const u8, sd_len as usize).to_vec() };
 
     unsafe {
         LocalFree(Some(HLOCAL(sd.0)));
@@ -216,11 +206,7 @@ pub fn apply_security_descriptor(path: &Path, sd_bytes: &[u8]) -> Result<()> {
 
     if !result2.as_bool() {
         let err = unsafe { GetLastError() };
-        anyhow::bail!(
-            "SetFileSecurityW failed for {:?}: error {:?}",
-            path,
-            err
-        );
+        anyhow::bail!("SetFileSecurityW failed for {:?}: error {:?}", path, err);
     }
 
     Ok(())
@@ -255,11 +241,7 @@ pub fn read_alternate_data_streams(path: &Path) -> Result<Option<Vec<(String, Ve
         Err(e) => {
             let win32_err = WIN32_ERROR((e.code().0 as u32) & 0xFFFF);
             if win32_err != ERROR_HANDLE_EOF {
-                log::warn!(
-                    "FindFirstStreamW failed for {:?}: {:?}",
-                    path,
-                    win32_err
-                );
+                log::warn!("FindFirstStreamW failed for {:?}: {:?}", path, win32_err);
             }
             return Ok(None);
         }
@@ -287,12 +269,7 @@ pub fn read_alternate_data_streams(path: &Path) -> Result<Option<Vec<(String, Ve
                     streams.push((clean_name, content));
                 }
                 Err(e) => {
-                    log::warn!(
-                        "failed to read ADS '{}' for {:?}: {}",
-                        name,
-                        path,
-                        e
-                    );
+                    log::warn!("failed to read ADS '{}' for {:?}: {}", name, path, e);
                 }
             }
         }

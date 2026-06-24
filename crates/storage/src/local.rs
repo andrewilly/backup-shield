@@ -102,7 +102,9 @@ impl LocalStorage {
     }
 
     fn snapshot_path(&self, name: &str) -> PathBuf {
-        self.root.join(dirs::SNAPSHOTS).join(Self::sanitize_name(name))
+        self.root
+            .join(dirs::SNAPSHOTS)
+            .join(Self::sanitize_name(name))
     }
 
     fn parity_path(&self, name: &str) -> PathBuf {
@@ -110,7 +112,9 @@ impl LocalStorage {
     }
 
     fn index_path(&self, name: &str) -> PathBuf {
-        self.root.join(dirs::INDEXES).join(Self::sanitize_name(name))
+        self.root
+            .join(dirs::INDEXES)
+            .join(Self::sanitize_name(name))
     }
 
     /// List all file names (as Strings) in a directory, ignoring sub-dirs.

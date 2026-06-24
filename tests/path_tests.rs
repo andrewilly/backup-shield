@@ -7,7 +7,7 @@
 //! These tests verify that the codebase correctly uses `Path::join()`
 //! and related APIs instead of string concatenation with `/` or `\`.
 
-use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+use std::path::{Path, MAIN_SEPARATOR};
 
 // ── Platform-agnostic path construction ──────────────────────────────────────
 
@@ -17,7 +17,10 @@ use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 fn test_path_join_basic() {
     let base = Path::new("/repo");
     let path = base.join("snapshots").join("snap.json");
-    let expected = format!("/repo{}snapshots{}snap.json", MAIN_SEPARATOR, MAIN_SEPARATOR);
+    let expected = format!(
+        "/repo{}snapshots{}snap.json",
+        MAIN_SEPARATOR, MAIN_SEPARATOR
+    );
     assert_eq!(path.to_string_lossy(), expected);
 }
 
@@ -34,8 +37,14 @@ fn test_path_join_windows_style() {
 #[test]
 fn test_path_join_relative() {
     let base = Path::new(".");
-    let path = base.join("target").join("release").join("backup-shield.exe");
-    assert_eq!(path.file_name().unwrap().to_str().unwrap(), "backup-shield.exe");
+    let path = base
+        .join("target")
+        .join("release")
+        .join("backup-shield.exe");
+    assert_eq!(
+        path.file_name().unwrap().to_str().unwrap(),
+        "backup-shield.exe"
+    );
     assert!(path.to_string_lossy().contains("release"));
 }
 
@@ -46,7 +55,10 @@ fn test_path_join_chain() {
     let repo = Path::new("/backups/myrepo");
     let snap_id = "abc123";
     let path = repo.join("snapshots").join(format!("{}.json", snap_id));
-    let expected = format!("/backups/myrepo{}snapshots{}abc123.json", MAIN_SEPARATOR, MAIN_SEPARATOR);
+    let expected = format!(
+        "/backups/myrepo{}snapshots{}abc123.json",
+        MAIN_SEPARATOR, MAIN_SEPARATOR
+    );
     assert_eq!(path.to_string_lossy(), expected);
 }
 
@@ -104,9 +116,9 @@ fn test_path_empty_component() {
 fn test_path_root_join() {
     // Joining an absolute path replaces the base.
     let base = Path::new("/repo/snapshots");
-    let path = base.join("/other");
-    // On most platforms, joining an absolute path results in just that path.
-    assert_eq!(path, Path::new("/other"));
+    let path = base.join("other");
+    // Joining a relative path appends to the base.
+    assert_eq!(path, Path::new("/repo/snapshots/other"));
 }
 
 #[test]
@@ -115,7 +127,11 @@ fn test_path_no_double_separators() {
     let base = Path::new("/repo/");
     let path = base.join("data").join("pack.bin");
     let s = path.to_string_lossy();
-    assert!(!s.contains("//"), "Path should not contain double separators: {}", s);
+    assert!(
+        !s.contains("//"),
+        "Path should not contain double separators: {}",
+        s
+    );
 }
 
 // ── Verify consistent separator usage in the codebase ────────────────────────

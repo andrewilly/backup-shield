@@ -333,7 +333,11 @@ impl Scrubber {
                     continue;
                 }
 
-                match parity_manager.repair_chunks(&available_chunks, total_chunks, group.chunk_size) {
+                match parity_manager.repair_chunks(
+                    &available_chunks,
+                    total_chunks,
+                    group.chunk_size,
+                ) {
                     Ok(reconstructed) => {
                         for (idx, hash) in all_group_hashes.iter().enumerate() {
                             if bad_set.contains(*hash) && idx < reconstructed.len() {

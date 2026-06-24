@@ -195,7 +195,11 @@ impl Snapshot {
             let target = match fs::read_link(path) {
                 Ok(t) => t.to_string_lossy().to_string(),
                 Err(e) => {
-                    log::warn!("failed to read symlink {:?}: {} — treating as broken", path, e);
+                    log::warn!(
+                        "failed to read symlink {:?}: {} — treating as broken",
+                        path,
+                        e
+                    );
                     String::new()
                 }
             };

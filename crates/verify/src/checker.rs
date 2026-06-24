@@ -398,8 +398,7 @@ impl Verifier {
                     continue;
                 }
                 // Check that the pack file exists.
-                let pack_path =
-                    backup_shield_core::pack::pack_path(&self.repo_path, meta.pack_id);
+                let pack_path = backup_shield_core::pack::pack_path(&self.repo_path, meta.pack_id);
                 if !pack_path.exists() {
                     chunks_missing += 1;
                     errors.push(VerifyError::ChunkMissing { hash: hash.clone() });

@@ -198,14 +198,17 @@ impl PackWriter {
 
         // Append checksum.
         {
-            let file = fs::OpenOptions::new().append(true).open(&tmp_file)
+            let file = fs::OpenOptions::new()
+                .append(true)
+                .open(&tmp_file)
                 .with_context(|| format!("failed to open temp pack for append {:?}", tmp_file))?;
             let mut appender = BufWriter::new(file);
             appender.write_all(&checksum)?;
             appender.flush()?;
             // fsync: ensure data is on physical media before rename.
             // Without this, a crash after rename loses data still in page-cache.
-            appender.into_inner()
+            appender
+                .into_inner()
                 .map_err(|e| anyhow::anyhow!("failed to finalize pack write: {}", e))?
                 .sync_all()?;
         }
